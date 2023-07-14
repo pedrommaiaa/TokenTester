@@ -82,3 +82,6 @@ docs/
 
 # Dotenv file
 .env
+
+# Scripts
+functionCache.json

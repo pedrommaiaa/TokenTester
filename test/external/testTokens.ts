@@ -9,6 +9,10 @@ const execAsync = promisify(exec);
 // Limit concurrency of task spawning
 const limit = pLimit(3);
 
+// Function cache
+const functionCacheFile = "functionCache.json";
+const functionCache = JSON.parse(fs.readFileSync(functionCacheFile, "utf8"));
+
 const main = (functionSelector0x: string, amountOfTokens: string, tokenNamesCsv: string) => {
   // Split the token names into an array, using comma delimiter
   const tokenNames = tokenNamesCsv.split(",");
@@ -25,24 +29,30 @@ const main = (functionSelector0x: string, amountOfTokens: string, tokenNamesCsv:
   const functionSelector = functionSelector0x.slice(2).replace(/0+$/, "");
 
   // Search for the human-readable function name from the foundry out/ ABI
-  const functionName = execSync(
-    `grep -r "${functionSelector}" out | grep "test" | cut -d: -f2 | cut -d\\" -f2 | cut -d\\( -f1`
-  )
-    .toString()
-    .trim();
+  let functionName = functionCache[functionSelector];
+
+  if (!functionName) {
+    functionName = execSync(
+      `grep -r "${functionSelector}" out | grep "test" | cut -d: -f2 | cut -d\\" -f2 | cut -d\\( -f1`
+    )
+      .toString()
+      .trim();
+
+    functionCache[functionSelector] = functionName;
+    fs.writeFileSync(functionCacheFile, JSON.stringify(functionCache, null, 2));
+  }
 
   const reportFile = "reports/TOKENS_REPORT.md";
 
-  if (!fs.existsSync(reportFile)) {
-    // Report file doesn't exist, create it and add header row
-    fs.writeFileSync(
-      reportFile,
-      "| TestName | TokenName | Result |\n| -------- | --------- | ------ |\n"
-    );
-  }
-
   // Create a writable stream to the report file
   const writeStream = fs.createWriteStream(reportFile, { flags: "a" });
+
+  // If the file was just created, write the header row
+  fs.stat(reportFile, (err, stats) => {
+    if (err || !stats.size) {
+      writeStream.write("| TestName | TokenName | Result |\n| -------- | --------- | ------ |\n")
+    }
+  });
 
   // Create task list
   const tasks: Promise<any>[] = [];
@@ -79,4 +89,4 @@ if (args.length != 3) {
 main(args[0], args[1], args[2]);
 
 // NOTE: Testing command
-// node dist/testTokens.js "0x7258935200000000000000000000000000000000000000000000000000000000" "0x09" "BaseERC20,"
+// node dist/testTokens.js "0x7258935200000000000000000000000000000000000000000000000000000000" "0x01" "BaseERC20,"
