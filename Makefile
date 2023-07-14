@@ -5,4 +5,6 @@
 -include .env
 
 build:; forge build
-		npx tsc --p tsconfig.json
+
+test:; ./scripts/test.sh -p "default"
+test-tokens:; ./scripts/test.sh -p "token"

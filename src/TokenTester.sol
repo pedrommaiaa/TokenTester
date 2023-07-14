@@ -7,7 +7,9 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 // Tokens
-import {BaseERC20} from "./tokens/BaseERC20.sol";
+import {BaseERC20} from "./tokens/ERC20/BaseERC20.sol";
+import {ERC20LowDecimals} from "./tokens/ERC20/ERC20LowDecimals.sol";
+import {ERC20HighDecimals} from "./tokens/ERC20/ERC20HighDecimals.sol";
 
 contract TokenTester is Test {
     IERC20 public tokenTest;
@@ -17,12 +19,20 @@ contract TokenTester is Test {
     string public tokensNameStr;
 
     enum Tokens {
-        BaseERC20
+        BaseERC20,
+        ERC20LowDecimals,
+        ERC20HighDecimals
     }
 
     constructor() {
-        tokens.push(address(new BaseERC20("BaseERC20", "TST")));
+        tokens.push(address(new BaseERC20()));
         tokenNames.push("BaseERC20");
+
+        tokens.push(address(new ERC20LowDecimals()));
+        tokenNames.push("ERC20LowDecimals");
+
+        tokens.push(address(new ERC20HighDecimals()));
+        tokenNames.push("ERC20HighDecimals");
 
         uint256 length = tokenNames.length;
         for (uint256 i; i < length;) {
@@ -57,7 +67,7 @@ contract TokenTester is Test {
 
             string[] memory inputs = new string[](5);
             inputs[0] = "node";
-            inputs[1] = "test/external/testTokens.js";
+            inputs[1] = "dist/testTokens.js";
             inputs[2] = Strings.toHexString(uint256(selector));
             inputs[3] = Strings.toHexString(uint256(tokens.length));
             inputs[4] = tokensNameStr;
