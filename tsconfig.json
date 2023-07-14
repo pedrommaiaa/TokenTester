@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "moduleResolution": "nodenext",
+    "outDir": "dist",
+    "target": "ESNext"
+  },
+  "exclude": ["node_modules", "lib"],
+  "include": ["test"]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "token-tester",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "p-limit": "^4.0.0"
+  }
+}
